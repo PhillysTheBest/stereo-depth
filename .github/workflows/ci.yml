@@ -1,0 +1,119 @@
+name: ci
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+      cuda: ${{ steps.filter.outputs.cuda }}
+      notebooks: ${{ steps.filter.outputs.notebooks }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            backend: ['backend/**', '.github/workflows/ci.yml']
+            frontend: ['frontend/**', '.github/workflows/ci.yml']
+            cuda: ['cuda/**', '.github/workflows/ci.yml']
+            notebooks: ['notebooks/**', '.github/workflows/ci.yml']
+
+  # Required checks always report a status; the work inside is skipped when paths are unchanged.
+  backend:
+    needs: changes
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+        if: needs.changes.outputs.backend == 'true'
+      - uses: astral-sh/setup-uv@v5
+        if: needs.changes.outputs.backend == 'true'
+        with:
+          enable-cache: true
+      - if: needs.changes.outputs.backend == 'true'
+        run: |
+          uv sync --frozen
+          uv run ruff check
+          uv run ruff format --check
+          uv run mypy
+          uv run pytest -m "not gpu" --cov=stereo_depth --cov-report=term
+
+  frontend:
+    needs: changes
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+        if: needs.changes.outputs.frontend == 'true'
+      - uses: pnpm/action-setup@v4
+        if: needs.changes.outputs.frontend == 'true'
+        with:
+          package_json_file: frontend/package.json
+      - uses: actions/setup-node@v4
+        if: needs.changes.outputs.frontend == 'true'
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+      - if: needs.changes.outputs.frontend == 'true'
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm lint
+          pnpm typecheck
+          pnpm test
+          pnpm exec vite build
+
+  cuda-build:
+    needs: changes
+    runs-on: ubuntu-latest
+    container: nvidia/cuda:12.8.0-devel-ubuntu22.04
+    steps:
+      - uses: actions/checkout@v4
+        if: needs.changes.outputs.cuda == 'true'
+      - if: needs.changes.outputs.cuda == 'true'
+        run: apt-get update -qq && apt-get install -y -qq make && make -C cuda
+
+  notebooks:
+    needs: changes
+    if: needs.changes.outputs.notebooks == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: |
+          uvx nbstripout --verify notebooks/*.ipynb
+          uvx --with ruff nbqa ruff notebooks/
+
+  docker-build:
+    needs: changes
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        image: [api, web]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.image == 'api' && 'backend' || 'frontend' }}
+          push: false
+          cache-from: type=gha,scope=${{ matrix.image }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.image }}
