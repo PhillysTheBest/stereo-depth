@@ -1,42 +1,42 @@
 # Handoff
 
-Status as of 2026-10-27. Branch `chore/ci-workflows` has one local commit (Sprint 0 scaffold). **Nothing has been pushed.**
+Status as of 2026-10-27. Branch `chore/ci-workflows` is pushed as PR #1 with every CI check green. It is waiting for a squash-merge.
 
 ## Current state
 
 Done and checked locally:
 
 - Repo layout: `backend/`, `frontend/`, `cuda/`, `notebooks/`, `scripts/`, `data/`, `docs/decisions/`
-- `oracle.ipynb` moved to `notebooks/` and stripped. It was one empty cell, not the CUDA 12.8 test on a T4 that the plan describes
+- `notebooks/oracle.ipynb` holds the Colab CUDA 12.8 test on a T4 (merged from `main`, outputs stripped)
 - Backend: uv project, FastAPI `/v1/health`, `DepthEngine` and `CameraSource` stubs, settings, 2 passing tests and 1 test marked `gpu`. ruff, ruff format, mypy (strict) and pytest all pass
 - Frontend: Vite + React 18 + TS scaffold, 1 passing vitest test. eslint, tsc and the Vite build pass. TypeScript is pinned to 5.8 because typescript-eslint doesn't support TS 7
 - Lockfiles committed: `backend/uv.lock`, `frontend/pnpm-lock.yaml`
 - Root: `Makefile`, `docker-compose.yml`, `.gitignore`, `.pre-commit-config.yaml`, README
 - Git identity for this repo set locally to `PhillysTheBest <151466366+PhillysTheBest@users.noreply.github.com>`, with no co-author lines
 
-Written but not yet run:
+Checked in CI (PR #1): `backend`, `frontend`, `cuda-build`, `notebooks`, `docker-build (api)` and `docker-build (web)` all pass.
 
-- `cuda/sgm/hello.cu` and `cuda/Makefile` (nvcc isn't installed locally, so CI's `cuda-build` job compiles it for the first time)
-- `backend/Dockerfile`, `backend/Dockerfile.gpu`, `frontend/Dockerfile` (no images built locally yet)
-- `.github/workflows/ci.yml`, `cd.yml`, `release.yml`, `gpu-tests.yml`, `dependabot.yml`, PR template
+Repo settings applied: squash merge only, auto-delete head branches, and ruleset `protect-main` (PR with 0 approvals, the five required checks, linear history, no force pushes or deletion).
+
+Not yet run: `cd.yml`, `release.yml`, `gpu-tests.yml`, `backend/Dockerfile.gpu`, and Dependabot (it starts once `dependabot.yml` is on `main`).
 
 ## To complete
 
 ### Sprint 0: Foundations (finish first)
 
-- [ ] Push `chore/ci-workflows` and open the PR (`gh pr create`)
-- [ ] Fix whatever fails on the first CI run, most likely `cuda-build`, `docker-build` or `notebooks`
-- [ ] Check the Docker images build and `/v1/health` responds (`make dev`)
+- [x] Push `chore/ci-workflows` and open the PR (`gh pr create`)
+- [x] Fix whatever fails on the first CI run (only a merge conflict with `main` over `oracle.ipynb`; every check passed)
+- [ ] Check the Docker images build and `/v1/health` responds (`make dev`). CI builds both images, but Docker Desktop's WSL integration is off, so `make dev` hasn't run
 - [ ] Squash-merge the PR once every check is green
 - [ ] Confirm `cd.yml` pushed `stereo-depth-api`, `stereo-depth-api-gpu` and `stereo-depth-web` to GHCR
-- [ ] Protect `main` (Settings, then Rules): require a PR with 0 approvals; require the checks `backend`, `frontend`, `cuda-build` and both `docker-build` matrix jobs; require linear history; allow squash merge only; block force pushes and deletion
-- [ ] Turn on auto-delete of head branches
+- [x] Protect `main` (Settings, then Rules): require a PR with 0 approvals; require the checks `backend`, `frontend`, `cuda-build` and both `docker-build` matrix jobs; require linear history; allow squash merge only; block force pushes and deletion
+- [x] Turn on auto-delete of head branches
 - [ ] Check that Dependabot is active for uv, npm, docker and github-actions
 - [ ] Link the Vercel project to the repo (root directory `frontend/`) and check each PR gets a preview
 - [ ] Make GHCR packages public if wanted (they're private by default)
 - [ ] Prove it: a trivial PR goes all green, merging it pushes images, and a direct push to `main` is rejected
 - [ ] Optional: install pre-commit locally (`make setup`) and run `pre-commit run --all-files`
-- [ ] Optional: put real CUDA test code in `notebooks/oracle.ipynb`, or delete it
+- [x] Optional: put real CUDA test code in `notebooks/oracle.ipynb`, or delete it
 
 ### Sprint 1: Oracle and evaluation (tag v0.1.0)
 
