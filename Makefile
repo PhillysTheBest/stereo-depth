@@ -1,4 +1,4 @@
-.PHONY: setup lint test dev bench cuda
+.PHONY: setup lint test dev bench data cuda
 
 setup:
 	cd backend && uv sync
@@ -17,7 +17,11 @@ dev:
 	docker compose up --build
 
 bench:
-	@echo "make bench arrives in Sprint 1"
+	cd backend && uv run stereo-bench --dataset $(or $(DATASET),kitti2015) --root ../data/$(or $(DATASET),kitti2015) $(BENCH_ARGS)
 
 cuda:
 	$(MAKE) -C cuda
+
+data:
+	bash scripts/download_kitti.sh data/kitti2015
+	bash scripts/download_middlebury.sh data/middlebury Q

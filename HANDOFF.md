@@ -41,18 +41,18 @@ Not yet run: `cd.yml`, `release.yml`, `gpu-tests.yml`, `backend/Dockerfile.gpu`,
 ### Sprint 1: Oracle and evaluation (tag v0.1.0)
 
 Backend
-- [ ] Add `opencv-python-headless`, Pillow and imageio
-- [ ] `engines/sgbm.py`: StereoSGBM engine implementing `DepthEngine`
-- [ ] `core/`: image I/O, downscale to 1280 px max, disparity to depth, PLY export (`plyfile`)
-- [ ] `scripts/download_kitti.sh`, `scripts/download_middlebury.sh`
-- [ ] `eval/`: KITTI 2015 and Middlebury loaders, EPE, D1-all and bad-2.0 metrics, runtime per pair
-- [ ] Benchmark CLI and `make bench`
-- [ ] Log SGBM scores on the KITTI 2015 train split (W&B)
+- [x] Add `opencv-python-headless`, Pillow and imageio
+- [x] `engines/sgbm.py`: StereoSGBM engine implementing `DepthEngine`
+- [x] `core/`: image I/O, downscale to 1280 px max, disparity to depth, PLY export (`plyfile`)
+- [x] `scripts/download_kitti.sh`, `scripts/download_middlebury.sh`
+- [x] `eval/`: KITTI 2015 and Middlebury loaders, EPE, D1-all and bad-2.0 metrics, runtime per pair
+- [x] Benchmark CLI and `make bench`
+- [ ] Log SGBM scores on the KITTI 2015 train split (W&B). Scored locally (README table); W&B logging is wired up (`--wandb`, `uv sync --extra track`) but needs a `WANDB_API_KEY`
 
 Frontend
-- [ ] Upload page for a left and right image
-- [ ] Mock API client
-- [ ] Result layout
+- [x] Upload page for a left and right image
+- [x] Mock API client
+- [x] Result layout
 
 Release
 - [ ] Tag `v0.1.0` and check `release.yml` retags the images and creates a GitHub Release
