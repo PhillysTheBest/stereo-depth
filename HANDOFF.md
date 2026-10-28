@@ -83,16 +83,16 @@ Done when
 ### Sprint 3: CUDA and 3D (tag v0.3.0)
 
 Backend and CUDA
-- [ ] CPU SGM reference in NumPy and Numba
-- [ ] CUDA kernels: cost volume, 4-path aggregation, winner-take-all (8 paths and sub-pixel come later)
-- [ ] `cuda/bindings.cpp` and `cuda/setup.py` building the `stereo_depth_cuda` PyTorch extension
-- [ ] `engines/cuda_sgm.py`
-- [ ] GPU tests and a speed benchmark in Colab
-- [ ] Notebooks install the package with `pip install git+...` and log to W&B
+- [x] CPU SGM reference in NumPy (`stereo_depth/sgm/`). Numba wasn't needed: each path is vectorised per scanline
+- [x] CUDA kernels: census cost volume, 4-path aggregation, winner-take-all (`cuda/sgm/sgm.cu`; 8 paths and sub-pixel come later)
+- [x] `cuda/bindings.cpp` and `cuda/setup.py` building the `stereo_depth_cuda` PyTorch extension (CI compiles it against torch cu128)
+- [x] `engines/cuda_sgm.py` and `engines/sgm_cpu.py`
+- [ ] GPU tests and a speed benchmark in Colab: written (`tests/gpu/test_cuda_sgm.py`, `notebooks/cuda_sgm.ipynb`), not yet run on a GPU
+- [x] Notebooks install the package from the repo and log to W&B when `WANDB_API_KEY` is set
 
 Frontend
-- [ ] PointCloud viewer (react-three-fiber)
-- [ ] Hover a pixel to read its depth
+- [x] PointCloud viewer (react-three-fiber), not yet on a page: needs the Sprint 2 result layout
+- [x] Hover a pixel to read its depth (`DepthProbe`), same
 - [ ] PNG and PLY downloads
 - [ ] Benchmarks page
 
