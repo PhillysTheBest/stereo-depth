@@ -1,6 +1,6 @@
 [project]
 name = "stereo-depth"
-version = "0.0.0"
+version = "0.1.0"
 description = "Stereo disparity, depth and point clouds from image pairs"
 requires-python = ">=3.12"
 dependencies = [
@@ -9,10 +9,18 @@ dependencies = [
     "pydantic>=2.9",
     "pydantic-settings>=2.6",
     "numpy>=2.0",
+    "opencv-python-headless>=4.10",
+    "pillow>=11.0",
+    "imageio>=2.36",
+    "plyfile>=1.1",
 ]
+
+[project.scripts]
+stereo-bench = "stereo_depth.eval.bench:main"
 
 [project.optional-dependencies]
 gpu = ["torch>=2.5"]
+track = ["wandb>=0.18"]
 
 [dependency-groups]
 dev = [
@@ -48,5 +56,5 @@ markers = ["gpu: needs a CUDA GPU (skipped in CI)"]
 addopts = "--strict-markers"
 
 [[tool.mypy.overrides]]
-module = ["torch", "torch.*"]
+module = ["torch", "torch.*", "plyfile", "wandb"]
 ignore_missing_imports = true
