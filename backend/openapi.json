@@ -1,0 +1,449 @@
+{
+  "components": {
+    "schemas": {
+      "Body_depth_v1_depth_post": {
+        "properties": {
+          "baseline_m": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Camera baseline in metres",
+            "title": "Baseline M"
+          },
+          "engine": {
+            "default": "raft_stereo",
+            "title": "Engine",
+            "type": "string"
+          },
+          "focal_px": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Focal length at upload size",
+            "title": "Focal Px"
+          },
+          "include_ply": {
+            "default": false,
+            "title": "Include Ply",
+            "type": "boolean"
+          },
+          "left": {
+            "contentMediaType": "application/octet-stream",
+            "description": "Rectified left image (PNG or JPEG)",
+            "title": "Left",
+            "type": "string"
+          },
+          "right": {
+            "contentMediaType": "application/octet-stream",
+            "description": "Rectified right image, same size",
+            "title": "Right",
+            "type": "string"
+          }
+        },
+        "required": [
+          "left",
+          "right"
+        ],
+        "title": "Body_depth_v1_depth_post",
+        "type": "object"
+      },
+      "ColorScale": {
+        "description": "How a heatmap PNG maps colour to value, so the UI can draw its legend.",
+        "properties": {
+          "colormap": {
+            "const": "turbo",
+            "default": "turbo",
+            "title": "Colormap",
+            "type": "string"
+          },
+          "max": {
+            "title": "Max",
+            "type": "number"
+          },
+          "min": {
+            "title": "Min",
+            "type": "number"
+          },
+          "reversed": {
+            "description": "True when the low end of the range is drawn red",
+            "title": "Reversed",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "min",
+          "max",
+          "reversed"
+        ],
+        "title": "ColorScale",
+        "type": "object"
+      },
+      "DepthResult": {
+        "properties": {
+          "depth_png": {
+            "description": "Colour-mapped depth as a PNG data URL, near is red",
+            "title": "Depth Png",
+            "type": "string"
+          },
+          "depth_scale": {
+            "$ref": "#/components/schemas/ColorScale"
+          },
+          "depth_stats": {
+            "$ref": "#/components/schemas/DepthStats"
+          },
+          "disparity_png": {
+            "description": "Colour-mapped disparity as a PNG data URL",
+            "title": "Disparity Png",
+            "type": "string"
+          },
+          "disparity_scale": {
+            "$ref": "#/components/schemas/ColorScale"
+          },
+          "engine": {
+            "title": "Engine",
+            "type": "string"
+          },
+          "height": {
+            "title": "Height",
+            "type": "integer"
+          },
+          "ply": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Coloured point cloud as a binary PLY data URL, if requested",
+            "title": "Ply"
+          },
+          "runtime_ms": {
+            "description": "Time spent inside the engine",
+            "title": "Runtime Ms",
+            "type": "number"
+          },
+          "scale": {
+            "description": "Output size divided by the uploaded size (<= 1)",
+            "title": "Scale",
+            "type": "number"
+          },
+          "total_ms": {
+            "description": "Time for the whole request, decoding included",
+            "title": "Total Ms",
+            "type": "number"
+          },
+          "unit": {
+            "description": "Metres when focal_px and baseline_m are given, else unitless relative depth",
+            "enum": [
+              "m",
+              "relative"
+            ],
+            "title": "Unit",
+            "type": "string"
+          },
+          "width": {
+            "title": "Width",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "engine",
+          "width",
+          "height",
+          "scale",
+          "unit",
+          "runtime_ms",
+          "total_ms",
+          "disparity_png",
+          "disparity_scale",
+          "depth_png",
+          "depth_scale",
+          "depth_stats"
+        ],
+        "title": "DepthResult",
+        "type": "object"
+      },
+      "DepthStats": {
+        "properties": {
+          "max": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max"
+          },
+          "mean": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mean"
+          },
+          "median": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Median"
+          },
+          "min": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Min"
+          },
+          "valid_fraction": {
+            "title": "Valid Fraction",
+            "type": "number"
+          }
+        },
+        "required": [
+          "min",
+          "max",
+          "mean",
+          "median",
+          "valid_fraction"
+        ],
+        "title": "DepthStats",
+        "type": "object"
+      },
+      "EngineStatus": {
+        "properties": {
+          "available": {
+            "description": "Dependencies and weights are present on this host",
+            "title": "Available",
+            "type": "boolean"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "loaded": {
+            "description": "Weights are in memory, so the next request has no load delay",
+            "title": "Loaded",
+            "type": "boolean"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "requires_gpu": {
+            "title": "Requires Gpu",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name",
+          "label",
+          "requires_gpu",
+          "available",
+          "loaded"
+        ],
+        "title": "EngineStatus",
+        "type": "object"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "Health": {
+        "properties": {
+          "engines": {
+            "items": {
+              "$ref": "#/components/schemas/EngineStatus"
+            },
+            "title": "Engines",
+            "type": "array"
+          },
+          "gpu": {
+            "title": "Gpu",
+            "type": "boolean"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "version",
+          "gpu",
+          "engines"
+        ],
+        "title": "Health",
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "title": "Stereo Depth API",
+    "version": "0.2.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/v1/depth": {
+      "post": {
+        "description": "Disparity and depth for one rectified pair. Images are processed in memory, never stored.",
+        "operationId": "depth_v1_depth_post",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_depth_v1_depth_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DepthResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Depth"
+      }
+    },
+    "/v1/engines": {
+      "get": {
+        "description": "Engines this host can run. GPU-only engines are hidden when there is no GPU.",
+        "operationId": "engines_v1_engines_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/EngineStatus"
+                  },
+                  "title": "Response Engines V1 Engines Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Engines"
+      }
+    },
+    "/v1/health": {
+      "get": {
+        "operationId": "health_v1_health_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Health"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Health"
+      }
+    }
+  }
+}

@@ -1,6 +1,6 @@
 [project]
 name = "stereo-depth"
-version = "0.1.0"
+version = "0.2.0"
 description = "Stereo disparity, depth and point clouds from image pairs"
 requires-python = ">=3.12"
 dependencies = [
@@ -13,13 +13,16 @@ dependencies = [
     "pillow>=11.0",
     "imageio>=2.36",
     "plyfile>=1.1",
+    "python-multipart>=0.0.17",
 ]
 
 [project.scripts]
 stereo-bench = "stereo_depth.eval.bench:main"
 
 [project.optional-dependencies]
-gpu = ["torch>=2.5"]
+# Pick one: `cpu` pulls CPU-only PyTorch wheels (CI, Hugging Face Spaces), `gpu` the CUDA 12.8 ones.
+cpu = ["torch>=2.5", "huggingface-hub>=0.26"]
+gpu = ["torch>=2.5", "huggingface-hub>=0.26"]
 track = ["wandb>=0.18"]
 
 [dependency-groups]
@@ -31,6 +34,25 @@ dev = [
     "ruff>=0.8",
 ]
 
+[tool.uv]
+conflicts = [[{ extra = "cpu" }, { extra = "gpu" }]]
+
+[tool.uv.sources]
+torch = [
+    { index = "pytorch-cpu", extra = "cpu" },
+    { index = "pytorch-cu128", extra = "gpu" },
+]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[[tool.uv.index]]
+name = "pytorch-cu128"
+url = "https://download.pytorch.org/whl/cu128"
+explicit = true
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
@@ -41,6 +63,7 @@ packages = ["src/stereo_depth"]
 [tool.ruff]
 line-length = 100
 target-version = "py312"
+extend-exclude = ["src/stereo_depth/engines/raft_stereo/_vendor"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "N", "SIM"]
@@ -56,5 +79,9 @@ markers = ["gpu: needs a CUDA GPU (skipped in CI)"]
 addopts = "--strict-markers"
 
 [[tool.mypy.overrides]]
-module = ["torch", "torch.*", "plyfile", "wandb"]
+module = ["torch", "torch.*", "plyfile", "wandb", "huggingface_hub"]
 ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = ["stereo_depth.engines.raft_stereo._vendor.*"]
+ignore_errors = true

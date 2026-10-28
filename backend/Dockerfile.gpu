@@ -6,6 +6,7 @@ COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-dev --extra gpu --no-install-project
 COPY src ./src
 RUN uv sync --frozen --no-dev --extra gpu
-ENV PATH="/app/.venv/bin:$PATH"
+ENV PATH="/app/.venv/bin:$PATH" STEREO_DATA_DIR=/app/data STEREO_PRELOAD_ENGINES=true
+RUN mkdir -p /app/data && (python -m stereo_depth.weights || true) && chmod -R a+rwX /app/data
 EXPOSE 7860
-CMD ["uvicorn", "stereo_depth.api.app:app", "--host", "0.0.0.0", "--port", "7860"]
+CMD ["sh", "-c", "python -m stereo_depth.weights; exec uvicorn stereo_depth.api.app:app --host 0.0.0.0 --port 7860"]

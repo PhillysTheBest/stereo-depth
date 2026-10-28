@@ -28,7 +28,7 @@ jobs:
         with:
           filters: |
             backend: ['backend/**', '.github/workflows/ci.yml']
-            frontend: ['frontend/**', '.github/workflows/ci.yml']
+            frontend: ['frontend/**', 'backend/openapi.json', '.github/workflows/ci.yml']
             cuda: ['cuda/**', '.github/workflows/ci.yml']
             notebooks: ['notebooks/**', '.github/workflows/ci.yml']
 
@@ -48,7 +48,7 @@ jobs:
           enable-cache: true
       - if: needs.changes.outputs.backend == 'true'
         run: |
-          uv sync --frozen
+          uv sync --frozen --extra cpu
           uv run ruff check
           uv run ruff format --check
           uv run mypy
@@ -76,6 +76,7 @@ jobs:
       - if: needs.changes.outputs.frontend == 'true'
         run: |
           pnpm install --frozen-lockfile
+          pnpm gen:api && git diff --exit-code src/api/schema.d.ts
           pnpm lint
           pnpm typecheck
           pnpm test

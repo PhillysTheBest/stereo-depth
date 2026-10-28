@@ -1,7 +1,7 @@
-.PHONY: setup lint test dev bench data cuda
+.PHONY: setup lint test dev bench data weights openapi cuda
 
 setup:
-	cd backend && uv sync
+	cd backend && uv sync --extra cpu
 	cd frontend && pnpm install
 	pre-commit install
 
@@ -10,7 +10,7 @@ lint:
 	cd frontend && pnpm lint && pnpm typecheck
 
 test:
-	cd backend && uv run pytest -m "not gpu"
+	cd backend && uv run --extra cpu pytest -m "not gpu"
 	cd frontend && pnpm test
 
 dev:
@@ -25,3 +25,11 @@ cuda:
 data:
 	bash scripts/download_kitti.sh data/kitti2015
 	bash scripts/download_middlebury.sh data/middlebury Q
+
+weights:
+	python scripts/fetch_weights.py
+
+# Regenerate the OpenAPI schema and the frontend's typed client after changing the API.
+openapi:
+	cd backend && uv run python -m stereo_depth.api.openapi
+	cd frontend && pnpm gen:api
