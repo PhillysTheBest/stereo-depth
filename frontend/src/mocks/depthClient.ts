@@ -1,27 +1,7 @@
-// Stand-in for the real API client until POST /v1/depth exists (Sprint 2).
-// The shape mirrors what that endpoint will return, so the UI won't change when it's swapped.
+// Offline stand-in for the API, used by tests and by `VITE_USE_MOCK=1 pnpm dev`.
+import type { DepthClient, Engine } from "../api/types";
 
-export interface DepthRequest {
-  left: File;
-  right: File;
-  engine: string;
-  focalPx?: number;
-  baselineM?: number;
-}
-
-export interface DepthResult {
-  engine: string;
-  disparityPng: string;
-  depthPng: string;
-  stats: { minM: number | null; maxM: number | null; medianM: number | null; validRatio: number };
-  plyUrl: string | null;
-  runtimeMs: number;
-  metric: boolean;
-}
-
-export interface DepthClient {
-  predict(req: DepthRequest): Promise<DepthResult>;
-}
+export type { DepthClient, DepthRequest, DepthResult } from "../api/types";
 
 function gradient(stops: string[]): string {
   const offsets = stops
@@ -36,19 +16,44 @@ function gradient(stops: string[]): string {
 
 const TURBO = ["#30123b", "#4686fb", "#1be5b5", "#a4fc3c", "#fbb938", "#e4460a", "#7a0403"];
 
+export const MOCK_ENGINES: Engine[] = [
+  {
+    name: "sgbm",
+    label: "OpenCV SGBM (classical)",
+    requires_gpu: false,
+    available: true,
+    loaded: true,
+  },
+  {
+    name: "raft_stereo",
+    label: "RAFT-Stereo (pretrained network)",
+    requires_gpu: false,
+    available: true,
+    loaded: false,
+  },
+];
+
 export const mockDepthClient: DepthClient = {
+  async engines() {
+    return MOCK_ENGINES;
+  },
   async predict(req) {
     await new Promise((resolve) => setTimeout(resolve, 300));
     const metric = req.focalPx !== undefined && req.baselineM !== undefined;
     return {
       engine: req.engine,
       disparityPng: gradient(TURBO),
+      disparityScale: { min: 2, max: 96, colormap: "turbo", reversed: false },
       depthPng: gradient([...TURBO].reverse()),
+      depthScale: metric
+        ? { min: 1.2, max: 38.5, colormap: "turbo", reversed: true }
+        : { min: 0.3, max: 3.1, colormap: "turbo", reversed: true },
       stats: metric
-        ? { minM: 1.2, maxM: 38.5, medianM: 9.7, validRatio: 0.87 }
-        : { minM: null, maxM: null, medianM: null, validRatio: 0.87 },
+        ? { min: 1.2, max: 38.5, median: 9.7, validRatio: 0.87 }
+        : { min: 0.3, max: 3.1, median: 1, validRatio: 0.87 },
       plyUrl: null,
       runtimeMs: 142,
+      totalMs: 180,
       metric,
     };
   },

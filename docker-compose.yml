@@ -3,6 +3,9 @@ services:
     build: ./backend
     ports: ["7860:7860"]
   web:
-    build: ./frontend
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: http://localhost:7860
     ports: ["8080:80"]
     depends_on: [api]

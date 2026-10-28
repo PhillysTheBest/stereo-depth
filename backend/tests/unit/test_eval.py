@@ -134,3 +134,22 @@ def test_bench_cli_end_to_end(
     assert result["config"]["engine"] == "sgbm"
     assert result["summary"]["d1_all"] < 0.1
     assert "mean" in capsys.readouterr().out
+
+
+def test_bench_compares_several_engines(
+    tmp_path: Path,
+    shifted_pair: tuple[Image, Image],
+    capsys: pytest.CaptureFixture[str],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from stereo_depth.engines import SGBMEngine
+    from stereo_depth.eval import bench
+
+    engines = {"sgbm": SGBMEngine(), "sgbm_wide": SGBMEngine(num_disparities=64, block_size=7)}
+    monkeypatch.setattr(bench, "get_engines", lambda: engines)
+    _fake_middlebury(tmp_path, shifted_pair)
+    args = ["--dataset", "middlebury", "--root", str(tmp_path), "--engine", "sgbm", "sgbm_wide"]
+    assert main(args) == 0
+    table = capsys.readouterr().out
+    assert "| engine | EPE | D1-all | bad-2.0 | ms/pair |" in table
+    assert "| sgbm |" in table and "| sgbm_wide |" in table

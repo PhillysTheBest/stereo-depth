@@ -59,22 +59,29 @@ Release
 
 ### Sprint 2: Model and API (tag v0.2.0)
 
+Branch `claude/project-thread-7zygdz`, stacked on Sprint 1's PR #15.
+
 Backend
-- [ ] RAFT-Stereo engine (check its licence) and `scripts/fetch_weights.py` pulling weights from Hugging Face
-- [ ] Run RAFT-Stereo on CPU at reduced size
-- [ ] Add CPU-only PyTorch wheels to CI
-- [ ] `POST /v1/depth`: multipart left/right, engine, optional `focal_px` and `baseline_m`; returns disparity and depth PNGs, depth stats, PLY link and runtime
-- [ ] `GET /v1/engines`, which hides GPU engines on CPU hosts
-- [ ] Extend `/v1/health` with model-loaded status
-- [ ] Return relative depth when there's no calibration, and don't store images
-- [ ] Publish the OpenAPI schema
-- [ ] Check `Dockerfile.gpu` works with the `[gpu]` extra
+- [x] RAFT-Stereo engine: MIT-licensed model code vendored in `engines/raft_stereo/_vendor/` (see its `NOTICE.md`), wrapped in `engines/raft_stereo/engine.py`
+- [x] `scripts/fetch_weights.py` (or `make weights`): pulls `raftstereo-middlebury.pth` from the Hugging Face repo in `STEREO_RAFT_HF_REPO`, else from the authors' release zip
+- [ ] Upload `raftstereo-middlebury.pth` to your own Hugging Face model repo and set `STEREO_RAFT_HF_REPO` (the authors only publish on Dropbox and Google Drive)
+- [x] Run RAFT-Stereo on CPU at reduced size (`STEREO_RAFT_CPU_MAX_PX=640`, 12 iterations; GPU uses 1280 px and 32)
+- [ ] Add CPU-only PyTorch wheels to CI: `pyproject.toml` has `cpu` and `gpu` extras on the PyTorch indexes, but `uv.lock` still needs regenerating with `uv lock` from a machine that can reach `download.pytorch.org`
+- [x] `POST /v1/depth`: multipart left/right, engine, optional `focal_px`, `baseline_m` and `include_ply`; returns disparity and depth PNGs with colour scales, depth stats, PLY (data URL) and runtime
+- [x] `GET /v1/engines`, which hides GPU engines on CPU hosts
+- [x] `/v1/health` lists each engine with `available` and `loaded`
+- [x] Relative depth when there's no calibration (median = 1); images stay in memory and are never stored
+- [x] OpenAPI schema committed at `backend/openapi.json` (`make openapi`); a test fails if it drifts
+- [x] `stereo-bench --engine sgbm raft_stereo` prints a comparison table
+- [ ] Check `Dockerfile.gpu` works with the `[gpu]` extra (needs the new lock)
+- [ ] Score RAFT-Stereo on KITTI 2015 with the real weights and add the table to the README
 
 Frontend
-- [ ] Typed client generated from OpenAPI into `src/api/`
-- [ ] ModelPicker for choosing the engine
-- [ ] Disparity and depth heatmaps with a colour scale
-- [ ] Loading and error states
+- [x] Typed client generated from OpenAPI into `src/api/` (`pnpm gen:api`; CI fails if it drifts)
+- [x] ModelPicker for choosing the engine
+- [x] Disparity and depth heatmaps with a colour scale
+- [x] Loading and error states
+- [x] `VITE_API_URL` points the app at the API; `VITE_USE_MOCK=1` runs it offline
 
 Done when
 - [ ] A browser upload returns depth from both engines, and a benchmark table compares them
