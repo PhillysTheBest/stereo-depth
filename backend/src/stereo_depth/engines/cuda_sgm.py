@@ -16,10 +16,10 @@ def _load() -> tuple[ModuleType, ModuleType] | None:
         return None
 
 
-class CudaSgmEngine(DepthEngine):
-    """SGM on the GPU via the `stereo_depth_cuda` PyTorch extension. Matches `SgmCpuEngine`."""
+class CudaSGMEngine(DepthEngine):
+    """SGM on the GPU via the `stereo_depth_cuda` PyTorch extension. Matches `SGMCpuEngine`."""
 
-    name = "cuda-sgm"
+    name = "cuda_sgm"
     requires_gpu = True
 
     def __init__(self, params: SgmParams | None = None) -> None:

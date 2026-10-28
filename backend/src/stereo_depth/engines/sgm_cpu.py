@@ -4,10 +4,10 @@ from stereo_depth.engines.base import DepthEngine, Disparity, Image
 from stereo_depth.sgm import SgmParams, sgm_disparity, to_gray
 
 
-class SgmCpuEngine(DepthEngine):
+class SGMCpuEngine(DepthEngine):
     """NumPy SGM. Slow, but it's the reference the CUDA engine must match."""
 
-    name = "sgm-cpu"
+    name = "sgm_cpu"
 
     def __init__(self, params: SgmParams | None = None) -> None:
         self.params = params or SgmParams()

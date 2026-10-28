@@ -3,7 +3,7 @@
 import numpy as np
 import pytest
 
-from stereo_depth.engines import CudaSgmEngine, SgmCpuEngine
+from stereo_depth.engines import CudaSGMEngine, SGMCpuEngine
 from stereo_depth.sgm import SgmParams, aggregate, census, cost_volume
 from tests.stereo_pairs import shifted_noise_pair
 
@@ -34,8 +34,8 @@ def test_cost_sum_matches_reference() -> None:
 def test_disparity_within_one_percent_of_reference(max_disp: int) -> None:
     left, right = shifted_noise_pair(120, 200, shift=17, seed=max_disp)
     params = SgmParams(max_disp=max_disp)
-    cpu = SgmCpuEngine(params).predict(left, right).values
-    gpu = CudaSgmEngine(params).predict(left, right).values
+    cpu = SGMCpuEngine(params).predict(left, right).values
+    gpu = CudaSGMEngine(params).predict(left, right).values
     assert (np.abs(cpu - gpu) > 1).mean() < 0.01
 
 
