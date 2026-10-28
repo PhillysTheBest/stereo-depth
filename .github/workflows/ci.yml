@@ -21,6 +21,7 @@ jobs:
       frontend: ${{ steps.filter.outputs.frontend }}
       cuda: ${{ steps.filter.outputs.cuda }}
       notebooks: ${{ steps.filter.outputs.notebooks }}
+      tools: ${{ steps.filter.outputs.tools }}
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
@@ -31,6 +32,7 @@ jobs:
             frontend: ['frontend/**', '.github/workflows/ci.yml']
             cuda: ['cuda/**', '.github/workflows/ci.yml']
             notebooks: ['notebooks/**', '.github/workflows/ci.yml']
+            tools: ['tools/**', '.github/workflows/ci.yml']
 
   # Required checks always report a status; the work inside is skipped when paths are unchanged.
   backend:
@@ -80,6 +82,23 @@ jobs:
           pnpm typecheck
           pnpm test
           pnpm exec vite build
+
+  colab-bridge:
+    needs: changes
+    if: needs.changes.outputs.tools == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: tools/colab_bridge
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: |
+          uv sync --frozen
+          uv run ruff check
+          uv run ruff format --check
+          uv run mypy
+          uv run pytest
 
   cuda-build:
     needs: changes
