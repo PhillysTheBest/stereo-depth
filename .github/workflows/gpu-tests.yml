@@ -15,4 +15,7 @@ jobs:
       - uses: astral-sh/setup-uv@v5
       - run: |
           uv sync --frozen --extra gpu
+          uv pip install setuptools
+          uv pip install --no-build-isolation ../cuda
+          make -C ../cuda test
           uv run pytest -m gpu

@@ -1,4 +1,4 @@
-.PHONY: setup lint test dev bench cuda
+.PHONY: setup lint test dev bench cuda cuda-ext
 
 setup:
 	cd backend && uv sync
@@ -21,3 +21,7 @@ bench:
 
 cuda:
 	$(MAKE) -C cuda
+
+# Needs nvcc and a CUDA build of torch in the backend venv; run on a GPU machine or Colab.
+cuda-ext:
+	cd backend && uv pip install setuptools && uv pip install --no-build-isolation ../cuda

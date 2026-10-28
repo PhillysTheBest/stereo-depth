@@ -88,8 +88,23 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         if: needs.changes.outputs.cuda == 'true'
-      - if: needs.changes.outputs.cuda == 'true'
+      - name: Compile kernels and self-test
+        if: needs.changes.outputs.cuda == 'true'
         run: apt-get update -qq && apt-get install -y -qq make && make -C cuda
+      - uses: astral-sh/setup-uv@v5
+        if: needs.changes.outputs.cuda == 'true'
+      # Compile only: there is no GPU here. Kernels run in Colab (notebooks/cuda_sgm.ipynb).
+      - name: Build the PyTorch extension
+        if: needs.changes.outputs.cuda == 'true'
+        env:
+          CUDA_HOME: /usr/local/cuda
+          TORCH_CUDA_ARCH_LIST: "7.5"
+          VIRTUAL_ENV: /tmp/ext
+        run: |
+          uv venv -p 3.12 /tmp/ext
+          uv pip install --index-url https://download.pytorch.org/whl/cu128 torch numpy setuptools
+          uv pip install --no-build-isolation ./cuda
+          /tmp/ext/bin/python -c "import torch, stereo_depth_cuda; print(stereo_depth_cuda.__doc__)"
 
   notebooks:
     needs: changes

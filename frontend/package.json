@@ -12,8 +12,11 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@react-three/drei": "^9.117.0",
+    "@react-three/fiber": "^8.17.10",
     "react": "18",
-    "react-dom": "18"
+    "react-dom": "18",
+    "three": "^0.170.0"
   },
   "devDependencies": {
     "@eslint/js": "9",
@@ -21,6 +24,7 @@
     "@testing-library/react": "^16.3.3",
     "@types/react": "18",
     "@types/react-dom": "18",
+    "@types/three": "^0.170.0",
     "@vitejs/plugin-react": "4",
     "eslint": "9",
     "eslint-plugin-react-hooks": "5",
@@ -30,5 +34,10 @@
     "typescript-eslint": "^8.72.1",
     "vite": "6",
     "vitest": "3"
+  },
+  "pnpm": {
+    "overrides": {
+      "@types/three": "$@types/three"
+    }
   }
 }
